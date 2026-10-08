@@ -13,15 +13,31 @@
   {% endif %}
 
   <form class="form" method="post" action="{{ url_for('analyze') }}">
-    <label for="repo_path">Repository path</label>
-    <input
-      type="text"
-      id="repo_path"
-      name="repo_path"
-      placeholder="C:Usersyouprojectsmy-repo"
-      required
-    >
-    <button type="submit" class="btn btn-primary">Analyze repository</button>
+  <label for="repo_path">Repository path</label>
+  <input
+    type="text"
+    id="repo_path"
+    name="repo_path"
+    placeholder="C:/Users/you/projects/my-repo"
+    required
+  >
+  <button type="submit" class="btn btn-primary">Analyze repository</button>
+</form>
+
+<div class="sample-section">
+  <h3>Try a sample repository</h3>
+  <form method="post" action="{{ url_for('analyze_sample') }}" class="sample-form">
+    <label for="sample_repo">Choose a sample:</label>
+    <select name="sample_repo" id="sample_repo" required>
+      <option value="C:/Users/jaswi/projects/requests">requests</option>
+      <option value="C:/Users/jaswi/projects/arrow">arrow</option>
+      <option value="C:/Users/jaswi/projects/httpie">httpie</option>
+      <option value="C:/Users/jaswi/projects/rich">rich</option>
+      <!-- Add or remove options as needed -->
+    </select>
+    <button type="submit" class="btn">Analyze sample</button>
   </form>
+</div>
+
 </section>
 {% endblock %}

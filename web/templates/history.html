@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Analyzed repositories</h2>
+
+{% if not repos %}
+<p>No repositories have been analyzed yet.</p>
+{% else %}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Path</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for repo in repos %}
+    <tr>
+      <td>{{ repo.name }}</td>
+      <td>{{ repo.path }}</td>
+      <td>
+        <a href="{{ url_for('dashboard', repo_id=repo.id, from_='history') }}" class="btn btn-sm">
+          View dashboard
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

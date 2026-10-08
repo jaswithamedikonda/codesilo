@@ -4,8 +4,8 @@ from pathlib import Path
 from analytics import get_file_concentration
 
 
-def export_concentration_csv(output_path="codesilo_concentration.csv"):
-    rows = get_file_concentration(limit=100)
+def export_concentration_csv(output_path="codesilo_concentration.csv", db_path=None):
+    rows = get_file_concentration(limit=100, db_path=db_path)
 
     fieldnames = [
         "file_path",
@@ -33,4 +33,5 @@ def export_concentration_csv(output_path="codesilo_concentration.csv"):
 
 
 if __name__ == "__main__":
+    # For CLI use, you’d need to pass a db_path; for now this is mainly used via Flask.
     export_concentration_csv()

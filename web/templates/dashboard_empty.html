@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="empty-state">
+  <h2>No repository selected</h2>
+  <p>
+    Choose a repository from the list below, or analyze a new one.
+  </p>
+
+  {% if message %}
+    <div class="alert alert-info">{{ message }}</div>
+  {% endif %}
+
+  {% if repos %}
+    <h3>Analyzed repositories</h3>
+    <ul class="repo-list">
+      {% for r in repos %}
+      <li>
+        <a href="{{ url_for('dashboard', repo_id=r.id) }}">
+          {{ r.name }}
+        </a>
+        <span class="repo-path">{{ r.path }}</span>
+      </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No repositories have been analyzed yet.</p>
+  {% endif %}
+
+  <div class="empty-actions">
+    <a href="{{ url_for('index') }}" class="btn btn-primary">
+      Analyze a new repository
+    </a>
+  </div>
+</section>
+{% endblock %}

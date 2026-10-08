@@ -1,7 +1,22 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Dashboard</h2>
+<section class="dashboard-header">
+  <div class="dashboard-title">
+    {% set back_to = request.args.get('from_', 'history') %}
+    {% if back_to == 'home' %}
+      <a href="{{ url_for('index') }}" class="back-link">← Back</a>
+    {% else %}
+      <a href="{{ url_for('history') }}" class="back-link">← Back</a>
+    {% endif %}
+    <h2>{{ repo.name }}</h2>
+  </div>
+  <div class="dashboard-actions">
+    <a href="{{ url_for('export', repo_id=repo.id) }}" class="btn">
+      Export CSV
+    </a>
+  </div>
+</section>
 
 <section class="stats">
   <div class="stat-card">
@@ -26,40 +41,60 @@
   </div>
 </section>
 
+{% if repo_suggestions %}
+<section class="suggestions">
+  <h3>Key risks & recommended actions</h3>
+  <ul>
+    {% for suggestion in repo_suggestions %}
+      <li>{{ suggestion }}</li>
+    {% endfor %}
+  </ul>
+</section>
+{% endif %}
+
 <section class="files-section">
   <h3>Files by risk</h3>
-
-  <table class="table">
-    <thead>
-      <tr>
-        <th>File path</th>
-        <th>Top contributor</th>
-        <th>Changes</th>
-        <th>Meaningful</th>
-        <th>Evidence</th>
-        <th>Important</th>
-        <th>Concentration</th>
-        <th>Risk</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in concentration %}
-      <tr>
-        <td class="file-path">{{ row.file_path }}</td>
-        <td>{{ row.top_contributor }}</td>
-        <td>{{ row.change_count }}</td>
-        <td>{{ row.meaningful_contributor_count }}</td>
-        <td>{{ row.evidence_strength }}</td>
-        <td>{{ "Yes" if row.potentially_important else "No" }}</td>
-        <td>{{ "%.2f"|format(row.concentration_percentage) }}%</td>
-        <td>
-          <span class="badge badge-{{ row.risk_level | lower }}">
-            {{ row.risk_level }}
-          </span>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+  <div class="table-wrapper">
+    <table class="table risk-table">
+      <thead>
+        <tr>
+          <th>File path</th>
+          <th>Top contributor</th>
+          <th>Changes</th>
+          <th>Meaningful</th>
+          <th>Evidence</th>
+          <th>Important</th>
+          <th>Concentration</th>
+          <th>Risk</th>
+          <th>Suggestion</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in concentration %}
+        <tr>
+          <td class="file-path">{{ row.file_path }}</td>
+          <td>{{ row.top_contributor }}</td>
+          <td>{{ row.change_count }}</td>
+          <td>{{ row.meaningful_contributor_count }}</td>
+          <td>{{ row.evidence_strength }}</td>
+          <td>{{ "Yes" if row.potentially_important else "No" }}</td>
+          <td>
+            {% if row.concentration_percentage is not none %}
+              {{ "%.2f"|format(row.concentration_percentage) }}%
+            {% else %}
+              –
+            {% endif %}
+          </td>
+          <td>
+            <span class="badge badge-{{ row.risk_level | lower }}">
+              {{ row.risk_level }}
+            </span>
+          </td>
+          <td class="file-suggestion">{{ row.suggestion }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
 </section>
 {% endblock %}

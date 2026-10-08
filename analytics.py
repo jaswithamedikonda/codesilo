@@ -7,6 +7,11 @@ from risk_engine import classify_risk
 
 DATABASE_PATH = Path("codesilo.db")
 
+def get_connection_for_db(db_path: Path):
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
 def tokenize_path(file_path):
     spaced_path = re.sub(
         "([a-z])([A-Z])",
@@ -29,9 +34,12 @@ def get_connection():
     return connection
 
 
-def get_top_files_by_activity(limit=20):
-    connection = get_connection()
-    cursor = connection.cursor()
+def get_top_files_by_activity(limit=20, db_path=None):
+    if db_path is None:
+        raise ValueError("db_path must be provided")
+
+    conn = get_connection_for_db(db_path)
+    cursor = conn.cursor()
 
     cursor.execute(
         """
@@ -49,16 +57,18 @@ def get_top_files_by_activity(limit=20):
     )
 
     rows = cursor.fetchall()
-    connection.close()
+    conn.close()
 
     return rows
 
-def get_file_concentration(limit=20, meaningful_threshold=10):
-    connection = get_connection()
-    cursor = connection.cursor()
+def get_file_concentration(limit=None, meaningful_threshold=10, db_path=None):
+    if db_path is None:
+        raise ValueError("db_path must be provided")
 
-    cursor.execute(
-        """
+    conn = get_connection_for_db(db_path)
+    cursor = conn.cursor()
+
+    sql = """
         WITH contributor_activity AS (
             SELECT
                 fc.file_path,
@@ -142,13 +152,18 @@ def get_file_concentration(limit=20, meaningful_threshold=10):
             ON rc.file_path = fcc.file_path
         WHERE rc.contributor_rank = 1
         ORDER BY rc.total_activity DESC
-        LIMIT ?
-        """,
-        (meaningful_threshold, limit),
-    )
+    """
+
+    params = [meaningful_threshold]
+
+    if limit is not None:
+        sql += "LIMIT ?"
+        params.append(limit)
+
+    cursor.execute(sql, params)
 
     rows = cursor.fetchall()
-    connection.close()
+    conn.close()
 
     results = []
 

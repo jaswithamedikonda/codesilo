@@ -11,9 +11,12 @@
     <div class="container header-inner">
       <h1 class="logo">CodeSilo</h1>
       <nav class="nav">
-        <a href="{{ url_for('index') }}">Home</a>
-        <a href="{{ url_for('dashboard') }}">Dashboard</a>
-        <a href="{{ url_for('export') }}">Export CSV</a>
+        <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' }}">
+          Home
+        </a>
+        <a href="{{ url_for('history') }}" class="{{ 'active' if request.endpoint == 'history' }}">
+          History
+        </a>
       </nav>
     </div>
   </header>
