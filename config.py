@@ -1,3 +1,9 @@
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+DATABASE_PATH = BASE_DIR / "codesilo.db"
+
+
 HIGH_CONCENTRATION_THRESHOLD = 80
 MEDIUM_CONCENTRATION_THRESHOLD = 60
 

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="hero">
+  <h2>Detect knowledge silos in your codebase</h2>
+  <p>
+    Enter a local repository path to analyze contributor concentration,
+    identify risky files, and reduce single-person bottlenecks.
+  </p>
+
+  {% if error %}
+    <div class="alert alert-error">{{ error }}</div>
+  {% endif %}
+
+  <form class="form" method="post" action="{{ url_for('analyze') }}">
+    <label for="repo_path">Repository path</label>
+    <input
+      type="text"
+      id="repo_path"
+      name="repo_path"
+      placeholder="C:Usersyouprojectsmy-repo"
+      required
+    >
+    <button type="submit" class="btn btn-primary">Analyze repository</button>
+  </form>
+</section>
+{% endblock %}

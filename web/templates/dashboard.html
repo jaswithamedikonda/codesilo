@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Dashboard</h2>
+
+<section class="stats">
+  <div class="stat-card">
+    <div class="stat-label">Total files</div>
+    <div class="stat-value">{{ total_files }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">High risk</div>
+    <div class="stat-value stat-high">{{ high_risk }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Medium risk</div>
+    <div class="stat-value stat-medium">{{ medium_risk }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Low risk</div>
+    <div class="stat-value stat-low">{{ low_risk }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Informational</div>
+    <div class="stat-value stat-info">{{ informational }}</div>
+  </div>
+</section>
+
+<section class="files-section">
+  <h3>Files by risk</h3>
+
+  <table class="table">
+    <thead>
+      <tr>
+        <th>File path</th>
+        <th>Top contributor</th>
+        <th>Changes</th>
+        <th>Meaningful</th>
+        <th>Evidence</th>
+        <th>Important</th>
+        <th>Concentration</th>
+        <th>Risk</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in concentration %}
+      <tr>
+        <td class="file-path">{{ row.file_path }}</td>
+        <td>{{ row.top_contributor }}</td>
+        <td>{{ row.change_count }}</td>
+        <td>{{ row.meaningful_contributor_count }}</td>
+        <td>{{ row.evidence_strength }}</td>
+        <td>{{ "Yes" if row.potentially_important else "No" }}</td>
+        <td>{{ "%.2f"|format(row.concentration_percentage) }}%</td>
+        <td>
+          <span class="badge badge-{{ row.risk_level | lower }}">
+            {{ row.risk_level }}
+          </span>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+{% endblock %}
