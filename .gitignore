@@ -1,4 +1,19 @@
+# Python cache files
 __pycache__/
-*.pyc
+*.py[cod]
+
+#Virtual environments
 .venv/
+
+# Local database and generated analysis exports
+data/*.db
+data/*.csv
 *.db
+
+# Local Flask/runtime files
+instance/
+
+# IDE settings
+.vscode/
+.idea/
+
