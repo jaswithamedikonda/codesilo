@@ -7,30 +7,39 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-  <header class="header">
-    <div class="container header-inner">
-      <h1 class="logo">CodeSilo</h1>
-      <nav class="nav">
-        <a href="{{ url_for('index') }}" class="{{ 'active' if request.endpoint == 'index' }}">
-          Home
-        </a>
-        <a href="{{ url_for('history') }}" class="{{ 'active' if request.endpoint == 'history' }}">
-          History
-        </a>
-      </nav>
-    </div>
-  </header>
+  <div class="site-shell">
+    <header class="header">
+      <div class="container header-inner">
+        <a href="{{ url_for('index') }}" class="logo">CodeSilo</a>
 
-  <main class="main">
-    <div class="container">
-      {% block content %}{% endblock %}
-    </div>
-  </main>
+        <nav class="nav" aria-label="Main navigation">
+          <a
+            href="{{ url_for('index') }}"
+            class="{{ 'active' if request.endpoint == 'index' }}"
+          >
+            Home
+          </a>
+          <a
+            href="{{ url_for('history') }}"
+            class="{{ 'active' if request.endpoint == 'history' }}"
+          >
+            History
+          </a>
+        </nav>
+      </div>
+    </header>
 
-  <footer class="footer">
-    <div class="container">
-      <p>CodeSilo — Knowledge-silo detection for codebases</p>
-    </div>
-  </footer>
+    <main class="main">
+      <div class="container">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>CodeSilo — Knowledge-silo detection for codebases</p>
+      </div>
+    </footer>
+  </div>
 </body>
 </html>

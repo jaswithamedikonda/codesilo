@@ -3,98 +3,262 @@
 {% block content %}
 <section class="dashboard-header">
   <div class="dashboard-title">
-    {% set back_to = request.args.get('from_', 'history') %}
-    {% if back_to == 'home' %}
-      <a href="{{ url_for('index') }}" class="back-link">← Back</a>
+    {% if from_ == "home" %}
+      <a class="back-link" href="{{ url_for('index') }}">← Back</a>
     {% else %}
-      <a href="{{ url_for('history') }}" class="back-link">← Back</a>
+      <a class="back-link" href="{{ url_for('history') }}">← Back</a>
     {% endif %}
     <h2>{{ repo.name }}</h2>
   </div>
+
   <div class="dashboard-actions">
-    <a href="{{ url_for('export', repo_id=repo.id) }}" class="btn">
+    <a href="{{ url_for('export', repo_id=repo.id) }}" class="btn btn-outline">
       Export CSV
     </a>
   </div>
 </section>
 
-<section class="stats">
-  <div class="stat-card">
+<section class="stats" aria-label="Repository risk statistics">
+  <a class="stat-card stat-card-link"
+     href="{{ url_for('repo_detail', repo_id=repo.id, from_=from_) }}">
     <div class="stat-label">Total files</div>
     <div class="stat-value">{{ total_files }}</div>
-  </div>
-  <div class="stat-card">
+  </a>
+
+  <a class="stat-card stat-card-link"
+     href="{{ url_for('repo_detail', repo_id=repo.id, risk='High', from_=from_) }}">
     <div class="stat-label">High risk</div>
     <div class="stat-value stat-high">{{ high_risk }}</div>
-  </div>
-  <div class="stat-card">
+  </a>
+
+  <a class="stat-card stat-card-link"
+     href="{{ url_for('repo_detail', repo_id=repo.id, risk='Medium', from_=from_) }}">
     <div class="stat-label">Medium risk</div>
     <div class="stat-value stat-medium">{{ medium_risk }}</div>
-  </div>
-  <div class="stat-card">
+  </a>
+
+  <a class="stat-card stat-card-link"
+     href="{{ url_for('repo_detail', repo_id=repo.id, risk='Low', from_=from_) }}">
     <div class="stat-label">Low risk</div>
     <div class="stat-value stat-low">{{ low_risk }}</div>
-  </div>
-  <div class="stat-card">
+  </a>
+
+  <a class="stat-card stat-card-link"
+     href="{{ url_for('repo_detail', repo_id=repo.id, risk='Informational', from_=from_) }}">
     <div class="stat-label">Informational</div>
     <div class="stat-value stat-info">{{ informational }}</div>
-  </div>
+  </a>
 </section>
 
-{% if repo_suggestions %}
-<section class="suggestions">
-  <h3>Key risks & recommended actions</h3>
-  <ul>
-    {% for suggestion in repo_suggestions %}
-      <li>{{ suggestion }}</li>
+{% if current_risk_filter %}
+<p class="filter-status">
+  Showing {{ current_risk_filter }} risk files.
+  <a href="{{ url_for('repo_detail', repo_id=repo.id, from_=from_) }}">
+    Clear filter
+  </a>
+</p>
+{% endif %}
+
+{% if recommendations %}
+<section class="needs-attention" aria-labelledby="needs-attention-heading">
+  <div class="section-heading">
+    <div>
+      <h3 id="needs-attention-heading">Needs attention</h3>
+      <p>Repository-level ownership patterns and suggested actions.</p>
+    </div>
+  </div>
+
+  <div class="recommendation-list">
+    {% for item in recommendations %}
+    <details class="recommendation-card">
+      <summary>
+        <span class="priority priority-{{ item.priority | default('Medium') | lower }}">
+          {{ item.priority | default('Priority') }} priority
+        </span>
+
+        <span class="recommendation-title">
+          {{ item.title | default('Ownership recommendation') }}
+        </span>
+
+        {% if item.risk %}
+        <a class="affected-count"
+           href="{{ url_for(
+             'repo_detail',
+             repo_id=repo.id,
+             risk=item.risk,
+             from_=from_
+           ) }}">
+          {{ item.count | default(0) }} affected file(s)
+        </a>
+        {% elif item.important_only %}
+        <span class="affected-count">
+          {{ item.count | default(0) }} affected file(s)
+        </span>
+        {% endif %}
+      </summary>
+
+      <p>{{ item.issue | default('Review repository ownership coverage.') }}</p>
+
+      {% if item.basis %}
+      <p class="recommendation-basis">
+        <strong>Why this appeared:</strong>
+        {{ item.basis }}
+      </p>
+      {% endif %}
+
+      <p>
+        <strong>Suggested action:</strong>
+        {{ item.action | default('Review maintainership and share knowledge.') }}
+      </p>
+    </details>
     {% endfor %}
-  </ul>
+  </div>
+</section>
+{% else %}
+<section class="needs-attention" aria-labelledby="needs-attention-heading">
+  <h3 id="needs-attention-heading">Needs attention</h3>
+  <p>No repository-level recommendations were generated from the available history.</p>
 </section>
 {% endif %}
 
-<section class="files-section">
-  <h3>Files by risk</h3>
+<section class="files-section" aria-labelledby="files-heading">
+  <div class="section-heading">
+    <div>
+      <h3 id="files-heading">Files by risk</h3>
+      <p>Search files by path and open a file for ownership details.</p>
+    </div>
+  </div>
+
+  <form class="file-search"
+        method="get"
+        action="{{ url_for('repo_detail', repo_id=repo.id) }}">
+    <input type="hidden" name="from_" value="{{ from_ }}">
+
+    {% if current_risk_filter %}
+    <input type="hidden" name="risk" value="{{ current_risk_filter }}">
+    {% endif %}
+
+    <label class="visually-hidden" for="file-search">
+      Search files by path
+    </label>
+
+    <input id="file-search"
+           type="search"
+           name="q"
+           value="{{ search_query | default('') }}"
+           placeholder="Search files by path...">
+
+    <button class="btn btn-outline" type="submit">Search</button>
+  </form>
+
+  {% if current_risk_filter or search_query %}
+  <div class="filter-status">
+    <span>
+      Showing {{ total_matching | default(0) }}
+      {% if current_risk_filter %}{{ current_risk_filter }} risk{% endif %}
+      file(s)
+      {% if search_query %}matching “{{ search_query }}”{% endif %}.
+    </span>
+
+    <a href="{{ url_for('repo_detail', repo_id=repo.id, from_=from_) }}">
+      Clear filters
+    </a>
+  </div>
+  {% endif %}
+
   <div class="table-wrapper">
     <table class="table risk-table">
       <thead>
         <tr>
-          <th>File path</th>
-          <th>Top contributor</th>
-          <th>Changes</th>
-          <th>Meaningful</th>
-          <th>Evidence</th>
-          <th>Important</th>
-          <th>Concentration</th>
-          <th>Risk</th>
-          <th>Suggestion</th>
+          <th scope="col">File</th>
+          <th scope="col">Risk</th>
+          <th scope="col">Ownership</th>
+          <th scope="col">Changes</th>
+          <th scope="col">Action</th>
         </tr>
       </thead>
+
       <tbody>
         {% for row in concentration %}
         <tr>
-          <td class="file-path">{{ row.file_path }}</td>
-          <td>{{ row.top_contributor }}</td>
-          <td>{{ row.change_count }}</td>
-          <td>{{ row.meaningful_contributor_count }}</td>
-          <td>{{ row.evidence_strength }}</td>
-          <td>{{ "Yes" if row.potentially_important else "No" }}</td>
-          <td>
-            {% if row.concentration_percentage is not none %}
-              {{ "%.2f"|format(row.concentration_percentage) }}%
-            {% else %}
-              –
-            {% endif %}
+          <td class="file-path">
+            <a href="{{ url_for(
+              'repo_file_detail',
+              repo_id=repo.id,
+              file_path=row.file_path,
+              from_=from_,
+              risk=current_risk_filter,
+              q=search_query,
+              page=page
+            ) }}">
+              {{ row.file_path }}
+            </a>
           </td>
+
           <td>
             <span class="badge badge-{{ row.risk_level | lower }}">
               {{ row.risk_level }}
             </span>
           </td>
-          <td class="file-suggestion">{{ row.suggestion }}</td>
+
+          <td class="number-cell">
+            {{ "%.2f"|format(row.concentration_percentage or 0) }}%
+          </td>
+
+          <td class="number-cell">{{ row.change_count | default(0) }}</td>
+
+          <td>
+            <a class="details-link"
+               href="{{ url_for(
+                 'repo_file_detail',
+                 repo_id=repo.id,
+                 file_path=row.file_path,
+                 from_=from_,
+                 risk=current_risk_filter,
+                 q=search_query,
+                 page=page
+               ) }}">
+              View details
+            </a>
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="5">No files match the current search and filter.</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
+
+  {% if page_count | default(1) > 1 %}
+  <nav class="pagination" aria-label="File results pages">
+    {% if page | default(1) > 1 %}
+    <a href="{{ url_for(
+      'repo_detail',
+      repo_id=repo.id,
+      from_=from_,
+      risk=current_risk_filter,
+      q=search_query,
+      page=page - 1
+    ) }}">Previous</a>
+    {% endif %}
+
+    <span>
+      Page {{ page | default(1) }} of {{ page_count | default(1) }}
+    </span>
+
+    {% if page | default(1) < page_count | default(1) %}
+    <a href="{{ url_for(
+      'repo_detail',
+      repo_id=repo.id,
+      from_=from_,
+      risk=current_risk_filter,
+      q=search_query,
+      page=page + 1
+    ) }}">Next</a>
+    {% endif %}
+  </nav>
+  {% endif %}
 </section>
 {% endblock %}

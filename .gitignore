@@ -1,14 +1,22 @@
 # Python cache files
 __pycache__/
 *.py[cod]
+*.pyo
 
 #Virtual environments
 .venv/
+venv/
+env/
 
 # Local database and generated analysis exports
 data/*.db
 data/*.csv
 *.db
+data/
+*.sqlite3
+
+#Cloned sample repositories
+data/samples/
 
 # Local Flask/runtime files
 instance/
@@ -16,4 +24,8 @@ instance/
 # IDE settings
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db
+
+.env
 

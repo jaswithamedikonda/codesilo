@@ -1,0 +1,140 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="file-detail-page">
+
+  <header class="file-detail-header">
+    <div class="file-detail-heading">
+      <a class="back-link"
+         href="{{ url_for(
+           'repo_detail',
+           repo_id=repo.id,
+           from_=from_,
+           risk=risk,
+           q=q,
+           page=page
+         ) }}">
+        ← Back to results
+      </a>
+
+      <h1 class="file-detail-path">{{ row.file_path }}</h1>
+    </div>
+
+    <a href="{{ url_for('export', repo_id=repo.id) }}"
+       class="btn btn-outline file-export">
+      Export CSV
+    </a>
+  </header>
+
+  <section class="file-metrics" aria-label="File ownership metrics">
+    <article class="file-metric file-metric-risk risk-{{ row.risk_level | lower }}">
+      <div class="file-metric-label">Risk level</div>
+      <div class="file-metric-value">{{ row.risk_level }}</div>
+    </article>
+
+    <article class="file-metric">
+      <div class="file-metric-label">Ownership concentration</div>
+      <div class="file-metric-value">
+        {{ "%.2f"|format(row.concentration_percentage or 0) }}%
+      </div>
+    </article>
+
+    <article class="file-metric">
+      <div class="file-metric-label">Changes</div>
+      <div class="file-metric-value">{{ row.change_count | default(0) }}</div>
+    </article>
+
+    <article class="file-metric">
+      <div class="file-metric-label">Contributors</div>
+      <div class="file-metric-value">
+        {{ row.total_contributor_count | default(0) }}
+      </div>
+    </article>
+
+    <article class="file-metric">
+      <div class="file-metric-label">Meaningful contributors</div>
+      <div class="file-metric-value">
+        {{ row.meaningful_contributor_count | default(0) }}
+      </div>
+    </article>
+  </section>
+
+  <section class="ownership-panel" aria-labelledby="ownership-heading">
+    <h2 id="ownership-heading">File ownership details</h2>
+
+    <dl class="ownership-details">
+      <div class="ownership-detail-row">
+        <dt>Top contributor</dt>
+        <dd>{{ row.top_contributor | default("Unknown") }}</dd>
+      </div>
+
+      <div class="ownership-detail-row">
+        <dt>Evidence strength</dt>
+        <dd>{{ row.evidence_strength | default("Unknown") }}</dd>
+      </div>
+
+      <div class="ownership-detail-row">
+        <dt>Potentially important</dt>
+        <dd>
+          {{ "Yes" if row.potentially_important else "No" }}
+        </dd>
+      </div>
+    </dl>
+
+    <p class="ownership-note">
+      These values summarize contribution history. They are ownership-risk
+      signals, not confirmation of current maintainer availability or file
+      maintenance health.
+    </p>
+  </section>
+
+  <section class="recommended-action-panel"
+           aria-labelledby="recommended-action-heading">
+    <p class="action-eyebrow">Recommended action</p>
+    <h2 id="recommended-action-heading">
+      {% if row.risk_level == "High" and row.meaningful_contributor_count <= 1 %}
+        Build a backup for this file
+      {% elif row.risk_level == "High" %}
+        Share ownership of this file
+      {% elif row.risk_level == "Medium" and row.potentially_important %}
+        Improve review coverage
+      {% elif row.risk_level == "Medium" %}
+        Build shared familiarity
+      {% elif row.evidence_strength == "Weak" %}
+        Reassess after more history
+      {% elif row.risk_level == "Low" and row.meaningful_contributor_count <= 1 %}
+        Consider a lightweight handoff
+      {% else %}
+        Continue normal review practices
+      {% endif %}
+    </h2>
+
+    <p class="action-reason">
+      {{ row.suggestion | default(
+        "Use the available contribution history as a signal and review ownership in context."
+      ) }}
+    </p>
+
+    <p class="action-next-step">
+      <strong>Suggested next step:</strong>
+      {% if row.risk_level == "High" and row.meaningful_contributor_count <= 1 %}
+        Ask another contributor to review the file and make a small follow-up
+        change to build shared familiarity.
+      {% elif row.risk_level == "High" %}
+        Invite another contributor to review and co-maintain a representative
+        change.
+      {% elif row.risk_level == "Medium" %}
+        Include another contributor in an upcoming review or change, then
+        document any important implementation context.
+      {% elif row.evidence_strength == "Weak" %}
+        Treat this result as preliminary and revisit it when the file has more
+        recorded change history.
+      {% else %}
+        Keep using normal review practices and revisit ownership if the
+        contribution pattern changes.
+      {% endif %}
+    </p>
+  </section>
+
+</section>
+{% endblock %}

@@ -12,35 +12,34 @@ def classify_risk(
     meaningful_contributor_count,
     potentially_important,
 ):
-    # Weak evidence: treat as informational unless important
+    # Weak evidence: not enough history to be confident
     if evidence_strength == "Weak":
         if potentially_important:
             return "Medium"
-        else:
-            return "Informational"
-
-    # Very few meaningful contributors: low-confidence signal
-    if meaningful_contributor_count <= 1:
-        if potentially_important:
-            return "Medium"
-        else:
-            # Still a silo, but low confidence due to limited history
-            return "Low"
+        return "Informational"
 
     # Strong evidence
     if evidence_strength == "Strong":
+        # Very concentrated ownership
         if concentration_percentage >= HIGH_CONCENTRATION_THRESHOLD:
             if potentially_important:
                 return "High"
-            else:
-                return "Medium"
+            # Non-important but very concentrated with strong evidence
+            if meaningful_contributor_count <= 1:
+                return "High"
+            return "Medium"
 
+        # Moderate concentration
         if concentration_percentage >= MEDIUM_CONCENTRATION_THRESHOLD:
             if potentially_important:
                 return "Medium"
-            else:
-                return "Low"
+            if meaningful_contributor_count <= 1:
+                return "Medium"
+            return "Low"
 
+        # Lower concentration
+        if meaningful_contributor_count <= 1 and potentially_important:
+            return "Medium"
         return "Low"
 
     # Moderate evidence
@@ -48,15 +47,19 @@ def classify_risk(
         if concentration_percentage >= HIGH_CONCENTRATION_THRESHOLD:
             if potentially_important:
                 return "High"
-            else:
+            if meaningful_contributor_count <= 1:
                 return "Medium"
+            return "Medium"
 
         if concentration_percentage >= MEDIUM_CONCENTRATION_THRESHOLD:
             if potentially_important:
                 return "Medium"
-            else:
-                return "Low"
+            if meaningful_contributor_count <= 1:
+                return "Medium"
+            return "Low"
 
+        if meaningful_contributor_count <= 1 and potentially_important:
+            return "Medium"
         return "Low"
 
     # Fallback

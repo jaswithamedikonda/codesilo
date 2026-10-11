@@ -1,43 +1,170 @@
 {% extends "base.html" %}
 
 {% block content %}
-<section class="hero">
-  <h2>Detect knowledge silos in your codebase</h2>
-  <p>
-    Enter a local repository path to analyze contributor concentration,
-    identify risky files, and reduce single-person bottlenecks.
-  </p>
+<section class="home-hero">
+  <div class="hero-card">
+    <div class="hero-content">
+      <p class="eyebrow">Repository knowledge analysis</p>
 
-  {% if error %}
-    <div class="alert alert-error">{{ error }}</div>
-  {% endif %}
+      <h1>Detect knowledge silos in your codebase</h1>
 
-  <form class="form" method="post" action="{{ url_for('analyze') }}">
-  <label for="repo_path">Repository path</label>
-  <input
-    type="text"
-    id="repo_path"
-    name="repo_path"
-    placeholder="C:/Users/you/projects/my-repo"
-    required
-  >
-  <button type="submit" class="btn btn-primary">Analyze repository</button>
-</form>
+      <p class="hero-description">
+        Analyze Git history to find files with concentrated ownership,
+        identify potential knowledge bottlenecks, and get practical actions
+        to reduce team risk.
+      </p>
 
-<div class="sample-section">
-  <h3>Try a sample repository</h3>
-  <form method="post" action="{{ url_for('analyze_sample') }}" class="sample-form">
-    <label for="sample_repo">Choose a sample:</label>
-    <select name="sample_repo" id="sample_repo" required>
-      <option value="C:/Users/jaswi/projects/requests">requests</option>
-      <option value="C:/Users/jaswi/projects/arrow">arrow</option>
-      <option value="C:/Users/jaswi/projects/httpie">httpie</option>
-      <option value="C:/Users/jaswi/projects/rich">rich</option>
-      <!-- Add or remove options as needed -->
-    </select>
-    <button type="submit" class="btn">Analyze sample</button>
-  </form>
-</div>
+      {% if error %}
+      <div class="alert alert-error" role="alert">
+        {{ error }}
+      </div>
+      {% endif %}
 
+      <form class="repo-form" action="{{ url_for('analyze') }}" method="post">
+        <label for="repo_path">Local repository folder path</label>
+
+        <div class="analyze-row">
+          <input
+            type="text"
+            id="repo_path"
+            name="repo_path"
+            placeholder="C:/Users/you/projects/my-repository"
+            autocomplete="off"
+            required
+          >
+          <button type="submit" class="btn btn-primary analyze-button">
+            Analyze repository
+          </button>
+        </div>
+
+        <p class="form-hint">
+          Large repositories can take a minute to analyze.
+        </p>
+      </form>
+
+      <section class="sample-section" aria-labelledby="sample-heading">
+        <div class="sample-copy">
+          <h2 id="sample-heading">No repository handy? Try an example</h2>
+          <p>
+            We will download and analyze a public repository so you see can the dashboard
+            before using your own codebase.
+          </p>
+        </div>
+
+        <form
+          id="sample-form"
+          action="{{ url_for('analyze_sample_known') }}"
+          method="post"
+        >
+          <input type="hidden" id="sample_name" name="sample_name">
+
+          <div class="sample-cards">
+            <button
+              type="button"
+              class="sample-card"
+              data-sample="httpie"
+            >
+              <span class="sample-name">HTTPie</span>
+              <span class="sample-description">
+                A command-line HTTP client with an active contributor history.
+              </span>
+              <span class="sample-time">Usually under 1 minute</span>
+            </button>
+
+            <button
+              type="button"
+              class="sample-card"
+              data-sample="arrow"
+            >
+              <span class="sample-name">Arrow</span>
+              <span class="sample-description">
+                A Python date and time library with a compact codebase.
+              </span>
+              <span class="sample-time">Usually under 1 minute</span>
+            </button>
+
+            <button
+              type="button"
+              class="sample-card"
+              data-sample="rich"
+            >
+              <span class="sample-name">Rich</span>
+              <span class="sample-description">
+                A terminal formatting library with broad community activity.
+              </span>
+              <span class="sample-time">Usually 1–2 minutes</span>
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
 </section>
+
+<section class="what-it-does" aria-labelledby="what-it-does-heading">
+  <h2 id="what-it-does-heading">What CodeSilo does</h2>
+
+  <div class="feature-row">
+    <article class="feature-item">
+      <span class="feature-number">01</span>
+      <h3>Analyzes Git history</h3>
+      <p>
+        Measures change activity, contributor concentration, and evidence
+        strength for files across a repository.
+      </p>
+    </article>
+
+    <article class="feature-item">
+      <span class="feature-number">02</span>
+      <h3>Finds knowledge risk</h3>
+      <p>
+        Flags files where important knowledge may be concentrated in too few
+        contributors.
+      </p>
+    </article>
+
+    <article class="feature-item">
+      <span class="feature-number">03</span>
+      <h3>Recommends actions</h3>
+      <p>
+        Gives repository-level and per-file recommendations for pairing,
+        ownership, review, and documentation.
+      </p>
+    </article>
+  </div>
+</section>
+
+<script>
+  const sampleForm = document.getElementById("sample-form");
+const sampleNameInput = document.getElementById("sample_name");
+const sampleCards = document.querySelectorAll(".sample-card");
+
+sampleCards.forEach((card) => {
+  card.addEventListener("click", () => {
+    sampleNameInput.value = card.dataset.sample;
+
+    sampleCards.forEach((button) => {
+      button.disabled = true;
+    });
+
+    card.classList.add("is-loading");
+    card.innerHTML = `
+      <span class="sample-name">Analyzing…</span>
+      <span class="sample-description">
+        Downloading and analyzing the repository. This may take a moment.
+      </span>
+    `;
+
+    sampleForm.submit();
+  });
+});
+
+  const repoForm = document.querySelector(".repo-form");
+  const analyzeButton = document.querySelector(".analyze-button");
+
+  repoForm.addEventListener("submit", () => {
+    analyzeButton.disabled = true;
+    analyzeButton.textContent = "Analyzing…";
+  });
+</script>
 {% endblock %}
