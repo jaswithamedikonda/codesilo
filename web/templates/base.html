@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>CodeSilo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <div class="site-shell">
+    <header class="header">
+      <div class="container header-inner">
+        <a href="{{ url_for('index') }}" class="logo">CodeSilo</a>
+
+        <nav class="nav" aria-label="Main navigation">
+          <a
+            href="{{ url_for('index') }}"
+            class="{{ 'active' if request.endpoint == 'index' }}"
+          >
+            Home
+          </a>
+          <a
+            href="{{ url_for('history') }}"
+            class="{{ 'active' if request.endpoint == 'history' }}"
+          >
+            History
+          </a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="main">
+      <div class="container">
+        {% block content %}{% endblock %}
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>CodeSilo — Knowledge-silo detection for codebases</p>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>

@@ -1,3 +1,8 @@
+from pathlib import Path
+
+BASE_DIR = Path(__file__).resolve().parent
+
+
 HIGH_CONCENTRATION_THRESHOLD = 80
 MEDIUM_CONCENTRATION_THRESHOLD = 60
 

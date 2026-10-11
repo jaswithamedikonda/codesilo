@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="dashboard-header">
+  <div class="dashboard-title">
+    <a class="back-link" href="{{ url_for('history') }}">← Back to history</a>
+    <h2>{{ repo.name }} — Analysis history</h2>
+  </div>
+
+  <span class="repo-path-history"
+        title="{{ repo.path }}">
+    {{ repo.path }}
+  </span>
+</section>
+
+<section class="run-history-section">
+  <div class="section-heading">
+    <div>
+      <h3>Analysis runs</h3>
+      <p>Each row represents an explicit repository analysis.</p>
+    </div>
+  </div>
+
+  {% if runs %}
+  <div class="table-wrapper">
+    <table class="table run-history-table">
+      <thead>
+        <tr>
+          <th scope="col">Started</th>
+          <th scope="col">Completed</th>
+          <th scope="col">Status</th>
+          <th scope="col">Files</th>
+          <th scope="col">Risk counts</th>
+          <th scope="col">Action</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for run in runs %}
+        <tr>
+          <td>
+            <time datetime="{{ run.started_at }}">
+              {{ run.started_at }}
+            </time>
+          </td>
+
+          <td>
+            {% if run.completed_at %}
+              <time datetime="{{ run.completed_at }}">
+                {{ run.completed_at }}
+              </time>
+            {% else %}
+              —
+            {% endif %}
+          </td>
+
+          <td>
+            <span class="run-status run-status-{{ run.status | lower }}">
+              {{ run.status }}
+            </span>
+
+            {% if run.error_summary %}
+            <details class="run-error">
+              <summary>View error</summary>
+              <p>{{ run.error_summary }}</p>
+            </details>
+            {% endif %}
+          </td>
+
+          <td>{{ run.file_count if run.file_count is not none else "—" }}</td>
+
+          <td class="run-risk-counts">
+            H {{ run.high_risk if run.high_risk is not none else "—" }}
+            · M {{ run.medium_risk if run.medium_risk is not none else "—" }}
+            · L {{ run.low_risk if run.low_risk is not none else "—" }}
+            · I {{ run.informational if run.informational is not none else "—" }}
+          </td>
+
+          <td>
+            {% if run.status == "Completed" %}
+            <a class="details-link"
+               href="{{ url_for(
+                 'analysis_report',
+                 repo_id=repo.id,
+                 run_id=run.id
+               ) }}">
+              View report
+            </a>
+            {% elif run.status == "Running" %}
+            <span class="run-pending">In progress</span>
+            {% else %}
+            <span class="run-unavailable">No report</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <h3>No analysis runs yet</h3>
+    <p>Run an analysis from the home page to create the first history record.</p>
+    <a class="btn btn-primary" href="{{ url_for('index') }}">
+      Go to Home
+    </a>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

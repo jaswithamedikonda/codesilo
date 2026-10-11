@@ -1,19 +1,16 @@
 import sqlite3
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 
 
-DATABASE_PATH = Path("codesilo.db")
-
-
-def get_connection():
-    connection = sqlite3.connect(DATABASE_PATH)
+def get_connection(db_path: Path):
+    connection = sqlite3.connect(db_path)
     connection.execute("PRAGMA foreign_keys = ON")
     return connection
 
 
-def create_tables():
-    connection = get_connection()
+def create_tables(db_path: Path):
+    connection = get_connection(db_path)
     cursor = connection.cursor()
 
     cursor.execute(
@@ -78,10 +75,10 @@ def create_tables():
     connection.close()
 
 
-def save_analysis(repo_path, records):
-    create_tables()
+def save_analysis(repo_path, records, db_path: Path):
+    create_tables(db_path)
 
-    connection = get_connection()
+    connection = get_connection(db_path)
     cursor = connection.cursor()
 
     repo_name = Path(repo_path).name

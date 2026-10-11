@@ -30,6 +30,7 @@ EXCLUDED_FILE_NAMES = {
     "changelog.rst",
     "changes",
     "changes.md",
+    "changes.rst",
     "notice",
     "license",
     "copying",
@@ -37,6 +38,8 @@ EXCLUDED_FILE_NAMES = {
     "package-lock.json",
     "yarn.lock",
     "poetry.lock",
+    ".gitignore",
+    "manifest.in",
 }
 
 EXCLUDED_EXTENSIONS = {
@@ -66,6 +69,12 @@ EXCLUDED_EXTENSIONS = {
     ".zip",
     ".pdf",
     ".map",
+
+    ".pem",
+    ".key",
+    ".crt",
+    ".csr",
+    ".cnf",
 }
 
 EXCLUDED_FILE_SUFFIXES = {

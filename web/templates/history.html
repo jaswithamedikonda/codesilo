@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block content %}
+<main class="history-page">
+  <header class="dashboard-header">
+    <h2>History</h2>
+  </header>
+
+  {% if analysis_error %}
+  <div class="alert alert-error">
+    Analysis failed: {{ analysis_error }}
+  </div>
+  {% endif %}
+
+  <p class="history-intro">
+    Review repositories and inspect their recent analysis runs.
+  </p>
+
+  <section class="history-section" aria-labelledby="history-heading">
+    <div class="section-heading">
+      <div>
+        <h3 id="history-heading">Analyzed repositories</h3>
+        <p>
+          Open a repository dashboard or review its analysis history.
+        </p>
+      </div>
+    </div>
+
+    {% if repos %}
+    <div class="history-table-card">
+      <div class="history-table-wrapper">
+        <table class="table history-table">
+          <thead>
+            <tr>
+              <th scope="col">Repository</th>
+              <th scope="col">Latest analysis</th>
+              <th scope="col">Status</th>
+              <th scope="col">Files</th>
+              <th scope="col">Action</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for repo in repos %}
+            <tr>
+              <td>
+                <div class="history-repo-name">
+                  <a href="{{ url_for(
+                    'repo_detail',
+                    repo_id=repo.id,
+                    from_='history'
+                  ) }}">
+                    {{ repo.name }}
+                  </a>
+                </div>
+
+                <div class="history-repo-path"
+                     title="{{ repo.path }}">
+                  {{ repo.path }}
+                </div>
+              </td>
+
+              <td>
+                {% if repo.last_completed_at %}
+                <span class="history-timestamp">
+                  {{ repo.last_completed_at }}
+                </span>
+                {% elif repo.last_started_at %}
+                <span class="history-timestamp">
+                  {{ repo.last_started_at }}
+                </span>
+                <span class="history-timestamp-secondary">
+                  Analysis started
+                </span>
+                {% else %}
+                <span class="history-timestamp">Never</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if repo.latest_status %}
+                <span class="run-status run-status-{{ repo.latest_status | lower }}">
+                  {{ repo.latest_status }}
+                </span>
+                {% else %}
+                <span class="run-status run-status-unavailable">
+                  No run
+                </span>
+                {% endif %}
+              </td>
+
+              <td>
+                {{ repo.latest_file_count if repo.latest_file_count is not none else "—" }}
+              </td>
+
+              <td>
+                <a class="history-action-link"
+                   href="{{ url_for(
+                     'repo_detail',
+                     repo_id=repo.id,
+                     from_='history'
+                   ) }}">
+                  View dashboard
+                </a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <h3>No repositories analyzed yet</h3>
+      <p>
+        Run an analysis from the Home page to create your first history entry.
+      </p>
+      <a class="btn btn-primary" href="{{ url_for('index') }}">
+        Go to Home
+      </a>
+    </div>
+    {% endif %}
+  </section>
+</main>
+{% endblock %}
